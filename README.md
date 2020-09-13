@@ -10,6 +10,7 @@ Web application that displays a countdown until popular rapper Bobby Shmurda's r
     4. Handle high data volumes = de-couple stream ingestion from additional processing using asynchronous processes, and ensure client side buffers are flushed regularly
     5. Manage volume consumption tracking on the client side
     6. Detect stream disconnections, evaluate and reconnect to stream automatically
+
 [Consuming Streaming Data](https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/integrate/consuming-streaming-data)
 
 ## Available Scripts
