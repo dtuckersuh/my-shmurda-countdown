@@ -1,6 +1,6 @@
 # Bobby Shmurda Countdown
 
-![Shmurda](https://pyxis.nymag.com/v1/imgs/96b/08c/b9b25883e9a90cc89339b3729f504487d2-bobby-shmurda.2x.rsocial.w600.jpg)
+![Shmurda](https://www.nydailynews.com/resizer/0WFbReH_FPlaA9RU4I3unlEclZs=/1200x0/top/arc-anglerfish-arc2-prod-tronc.s3.amazonaws.com/public/3FJNG6SA2ZBSYFHZXACI7IKQ3E.jpg)
 
 Web application that displays a countdown until popular rapper Bobby Shmurda's release from prison, a live stream of Tweets relating to Shmurda and his release, and a live News stream containing articles pertaining to Shmurda.
 
