@@ -14,13 +14,13 @@
 ## Filtered Stream
 - Client Design
 
-    1. Establish an HTTPS streaming connection to the filter stream endpoint
-    2. Asynchronously send POST requests to the filter stream rules endpoint to add and delete rules from the stream
-    3. Handle low data volumes - Maintain the streaming connection, detecting Tweet objects and keep-alive signals
-    4. Handle high data volumes = de-couple stream ingestion from additional processing using asynchronous processes, and ensure client side
-        buffers are flushed regularly
-    5. Manage volume consumption tracking on the client side
-    6. Detect stream disconnections, evaluate and reconnect to stream automatically
+1. Establish an HTTPS streaming connection to the filter stream endpoint
+2. Asynchronously send POST requests to the filter stream rules endpoint to add and delete rules from the stream
+3. Handle low data volumes - Maintain the streaming connection, detecting Tweet objects and keep-alive signals
+4. Handle high data volumes = de-couple stream ingestion from additional processing using asynchronous processes, and ensure client side
+    buffers are flushed regularly
+5. Manage volume consumption tracking on the client side
+6. Detect stream disconnections, evaluate and reconnect to stream automatically
 
 ## Twitter API v2 Notes
 - Rate Limits
