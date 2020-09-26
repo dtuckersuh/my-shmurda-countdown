@@ -1,5 +1,6 @@
 import React from 'react'
 import TweetFeed from './TweetFeed'
+import '../stylesheets/App.css'
 
 class App extends React.Component {
     render() {

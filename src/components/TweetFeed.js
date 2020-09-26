@@ -1,6 +1,8 @@
-import React, { useEffect, useReducer }from 'react'
-import Tweet from './Tweet'
-import socketIOClient from "socket.io-client"
+import React, { useEffect, useReducer } from 'react';
+import socketIOClient from "socket.io-client";
+
+import Tweet from './Tweet';
+import ErrorMessage from './ErrorMessage';
 
 const reducer = (state, action) => {
     switch (action.type) {
@@ -61,22 +63,29 @@ const TweetFeed = () => {
     }
 
     const reconnectMessage = () => {
-        //const message = {
-        //    title: "Reconnecting",
-        //    detail: "Please wait while we reconnect to the stream.",
-        //}
+        const message = {
+            title: "Reconnecting",
+            detail: "Please wait while we reconnect to the stream.",
+        }
 
         if (error && error.detail) {
-            // Return ErrorMessage
+            return (
+                <div>
+                    <ErrorMessage key={error.title} error={error} styleType="warning" />
+                    <ErrorMessage key={message.title} error={message} styleType="success" />
+                </div>
+            )
         }
     }
 
     const errorMessage = () => {
         const { errors } = state
-        //if (errors && errors.length > 0){
-            // Return ErrorMessage
-        //}
-    }
+        if (errors && errors.length > 0){
+            return errors.map((error) => (
+                <ErrorMessage key={error.title} error={error} styleType="negative" />
+            )); 
+        }
+    };
 
     const waitingMessage = () => {
         const message = {
@@ -84,9 +93,19 @@ const TweetFeed = () => {
             detail: "Waiting for new Tweets to be posted",
         }
         
-        //if (isWaiting) {
-            // Return ErrorMessage
-        //}
+        if (isWaiting) {
+            return (
+                <React.Fragment>
+                    <div>
+                        <ErrorMessage
+                            key={message.title}
+                            error={message}
+                            styleType="success"
+                        />
+                    </div>
+                </React.Fragment>
+            ) 
+        }
     }
 
     useEffect(() => {
@@ -97,9 +116,9 @@ const TweetFeed = () => {
         if (tweets.length > 0) {
             return (
                 <React.Fragment>
-                    {tweets.map((tweet) => {
+                    {tweets.map((tweet) => (
                         <Tweet key={tweet.data.id} json={tweet} />
-                    })}
+                    ))}
                 </React.Fragment>
             )
         }
@@ -107,9 +126,12 @@ const TweetFeed = () => {
 
     return (
         <div>
+            {reconnectMessage()}
+            {errorMessage()}
+            {waitingMessage()}
             {showTweets()}
         </div>
     )
 }
 
-export default TweetFeed
+export default TweetFeed;

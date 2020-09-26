@@ -2,15 +2,23 @@ const express = require("express")
 const request = require("request")
 const socketIo = require("socket.io")
 const http = require("http")
+const util = require("util")
+const path = require("path")
+const bodyParser = require("body-parser");
+require('dotenv').config();
 
 const app = express()
-let port = 3000
+let port = process.env.PORT || 3000
+const post = util.promisify(request.post);
+const get = util.promisify(request.get);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const server = http.createServer(app)
 const io = socketIo(server)
 
 const BEARER_TOKEN = process.env.REACT_APP_TWITTER_BEARER_TOKEN
-
 let timeout = 0
 
 // Filtered stream and rules endpoints
@@ -24,6 +32,11 @@ const authMessage = {
     ],
     type: "https://developer.twitter.com/en/docs/authentication"
 }
+
+const errorMessage = {
+    title: "Please Wait",
+    detail: "Waiting for new Tweets to be posted...",
+};
 
 const sleep = async (delay) => {
     return new Promise((resolve) => setTimeout(() => resolve(true), delay))
@@ -53,12 +66,14 @@ app.get("/api/rules", async (req, res) => {
                 throw new Error(response.body.error.message)
             }
         }
-
+        res.cookie({sameSite: 'Lax'});
         res.send(response)
     } catch (e) {
         res.send(e)
     }
 })
+
+const payload = { add: [{ value: "Bobby Shmurda OR #BobbyShmurda OR #FreeShmurda -#NowPlaying"}]};
 
 app.post("api/rules", async (req, res) => {
     if (!BEARER_TOKEN) {
@@ -71,7 +86,7 @@ app.post("api/rules", async (req, res) => {
         auth: {
             bearer: token,
         },
-        json: req.body,
+        json: payload,
     }
 
     try {
@@ -88,8 +103,7 @@ app.post("api/rules", async (req, res) => {
 })
 
 const streamTweets = (socket, token) => {
-    let stream
-
+    //let stream;
     const config = {
         url: streamURL,
         auth: {
@@ -97,7 +111,6 @@ const streamTweets = (socket, token) => {
         },
         timeout: 31000,
     }
-
     try {
         const stream = request.get(config)
         stream

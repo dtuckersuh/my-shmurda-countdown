@@ -1,7 +1,12 @@
 # Program Design and Notes
 
 ## TODO:
-- Apply streaming app tutorial to application
+- [x] Apply streaming app tutorial to application
+- [ ] Fix SameSite cookie issue
+- [ ] Make site pretty (semantic-ui?)
+- [ ] Figure out how to cache previous tweets so user doesn't open empty page
+- [ ] Make countdown clock from Shmurda's parole date
+- [ ] Add newsfeed
 
 ## Stream Tweets in Real Time
 - Plan and prepare to process the needed data
