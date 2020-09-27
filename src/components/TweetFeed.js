@@ -36,7 +36,7 @@ const TweetFeed = () => {
     const { tweets, error, isWaiting } = state
 
     const streamTweets = () => {
-        let socket
+        let socket;
 
         if (process.env.NODE_ENV === "development") {
             socket = socketIOClient("http://localhost:3001/")
@@ -45,6 +45,13 @@ const TweetFeed = () => {
         }
 
         socket.on("connect", () => {})
+        // Initial 10 tweets on startup
+        socket.on("search", (json) => {
+            console.log('search socket reached');
+            if (json.data) {
+                dispatch({ type: "add_tweet", payload: json });
+            }
+        })
         socket.on("tweet", (json) => {
             if (json.data) {
                 dispatch({ type: "add_tweet", payload: json })

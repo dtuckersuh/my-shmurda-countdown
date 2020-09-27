@@ -24,6 +24,7 @@ let timeout = 0
 // Filtered stream and rules endpoints
 const streamURL = new URL("https://api.twitter.com/2/tweets/search/stream")
 const rulesURL = new URL("https://api.twitter.com/2/tweets/search/stream/rules")
+const searchURL = new URL("https://api.twitter.com/2/tweets/search/recent");
 
 const authMessage = {
     title: "Could not authenticate",
@@ -58,7 +59,6 @@ app.get("/api/rules", async (req, res) => {
 
     try {
         const response = await get(requestConfig)
-        
         if (response.statusCode !== 200) {
             if (response.statusCode === 403) {
                 res.status(403).send(response.body)
@@ -66,14 +66,13 @@ app.get("/api/rules", async (req, res) => {
                 throw new Error(response.body.error.message)
             }
         }
-        res.cookie({sameSite: 'Lax'});
+        console.log(response);
         res.send(response)
     } catch (e) {
         res.send(e)
     }
 })
 
-const payload = { add: [{ value: "Bobby Shmurda OR #BobbyShmurda OR #FreeShmurda -#NowPlaying"}]};
 
 app.post("api/rules", async (req, res) => {
     if (!BEARER_TOKEN) {
@@ -81,6 +80,7 @@ app.post("api/rules", async (req, res) => {
     }
     
     const token = BEARER_TOKEN
+    const payload = { add: [{ value: "Bobby Shmurda OR #BobbyShmurda OR #FreeShmurda -#NowPlaying"}]};
     const requestConfig = {
         url: rulesURL,
         auth: {
@@ -102,6 +102,77 @@ app.post("api/rules", async (req, res) => {
     }
 })
 
+//const payload = { 'query': "Bobby Shmurda OR #BobbyShmurda OR #FreeShmurda -#NowPlaying",
+//                        'max_results': '10'};
+
+// Initial search of 10 filtered tweets
+app.get("api/search", async (req, res) => {
+    if (!BEARER_TOKEN) {
+        res.status(400).send(authMessage);
+    }
+
+    const token = BEARER_TOKEN;
+    const requestConfig = {
+        url: 'https://api.twitter.com/2/tweets/search/recent?query=Bobby Shmurda OR %23BobbyShmurda OR %23FreeShmurda -%23NowPlaying&max_results=10',
+        auth: {
+            bearer: token,
+        },
+    }
+
+    try {
+        const response = await get(requestConfig);
+        //console.log(response);
+        if (response.statusCode === 200 || response.statusCode === 201) {
+            res.send(response);
+        } else {
+            throw new Error(response);
+        }
+    } catch (e) {
+        res.send(e);
+    }
+});
+
+const initialTweets = (socket, token) => {
+    //const config = {
+    //    url: searchURL,
+    //    auth: {
+    //        bearer: token,
+    //    },
+    //    json: payload,
+    //}
+    let config = {
+      'url': 'https://api.twitter.com/2/tweets/search/recent?query=Bobby Shmurda OR %23BobbyShmurda OR %23FreeShmurda -%23NowPlaying&max_results=10',
+      'headers': {
+        'Authorization': 'Bearer AAAAAAAAAAAAAAAAAAAAAGPtGwEAAAAAzZDj98cSgwXDfMKLXS0u35pCZXg%3DefiSmLc7iD8eQ6dRlLf6Z9xfyQ5VL7xdKQdWzHaCTEVzIql1Mn',
+        'Cookie': 'personalization_id="v1_btHYm+zSlDj7Hzg8e8RFmQ=="; guest_id=v1%3A159926825574158480'
+      }
+    };
+    try {
+        const json = request.get(config);
+        console.log(json);
+        console.log('initial tweets function reached');
+        if (json.connection_issue) {
+            console.log('json connection issue');
+            socket.emit("error", json);
+        } else {
+            if (json.data) {
+                socket.emit("search", json);
+            } else {
+                console.log('incorrect/no json.data')
+                socket.emit("error", errorMessage);
+            }
+        }
+    } catch (e) {
+        console.log('error catch');
+        socket.emit("error", errorMessage);
+    }
+    //request(options, function (error, response, socket) {
+    //  if (error) throw new Error(error);
+    //  socket.emit("search", response);
+    //});
+    
+}
+
 const streamTweets = (socket, token) => {
     //let stream;
     const config = {
@@ -113,10 +184,13 @@ const streamTweets = (socket, token) => {
     }
     try {
         const stream = request.get(config)
+        //console.log(stream);
+        initialTweets(socket, token);
         stream
             .on("data", (data) => {
                 try {
                     const json = JSON.parse(data)
+                    //console.log(json);
                     if (json.connection_issue) {
                         socket.emit("error", json)
                         reconnect(stream, socket, token)
@@ -150,11 +224,11 @@ const reconnect = async (stream, socket, token) => {
 
 io.on("connection", async (socket) => {
     try {
-        const token = BEARER_TOKEN
-        io.emit("connect", "Client Connected")
-        const stream = streamTweets(io, token)
+        const token = BEARER_TOKEN;
+        io.emit("connect", "Client Connected");
+        streamTweets(io, token);
     } catch (e) {
-        io.emit("authError", authMessage)
+        io.emit("authError", authMessage);
     }
 })
 
