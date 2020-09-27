@@ -143,7 +143,7 @@ const initialTweets = (socket, token) => {
     let config = {
       'url': 'https://api.twitter.com/2/tweets/search/recent?query=Bobby Shmurda OR %23BobbyShmurda OR %23FreeShmurda -%23NowPlaying&max_results=10',
       'headers': {
-        'Authorization': 'Bearer AAAAAAAAAAAAAAAAAAAAAGPtGwEAAAAAzZDj98cSgwXDfMKLXS0u35pCZXg%3DefiSmLc7iD8eQ6dRlLf6Z9xfyQ5VL7xdKQdWzHaCTEVzIql1Mn',
+        'Authorization': 'Bearer ', token,
         'Cookie': 'personalization_id="v1_btHYm+zSlDj7Hzg8e8RFmQ=="; guest_id=v1%3A159926825574158480'
       }
     };
