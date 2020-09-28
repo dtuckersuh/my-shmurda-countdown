@@ -1,8 +1,10 @@
 import React from 'react'
 import { TwitterTweetEmbed } from 'react-twitter-embed'
 
-const Tweet = ({ json }) => {
-    const { id } = json.data
+
+const Tweet = ({ json, initial }) => {
+    //console.log(json);
+    const id = initial ? json.id : json.data.id;
     const options = {
         cards: "hidden",
         align: "center",

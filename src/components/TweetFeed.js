@@ -6,6 +6,15 @@ import ErrorMessage from './ErrorMessage';
 
 const reducer = (state, action) => {
     switch (action.type) {
+        case "initialize":
+            return {
+                ...state,
+                initial: [action.payload, ...state.initial],
+                tweets: [],
+                error: null,
+                isWaiting: false,
+                errors: [],
+            }
         case "add_tweet":
             return {
                 ...state,
@@ -27,14 +36,36 @@ const reducer = (state, action) => {
 
 const TweetFeed = () => {
     const initialState = {
+        initial: [],
         tweets: [],
         error: {},
         isWaiting: true,
     }
 
     const [state, dispatch] = useReducer(reducer, initialState)
-    const { tweets, error, isWaiting } = state
+    const { initial, tweets, error, isWaiting } = state
 
+    const initializeTweets = () => {
+        let socket;
+        if (process.env.NODE_ENV === "development") {
+                socket = socketIOClient("http://localhost:3001/")
+        } else {
+            socket = socketIOClient("/")
+        }
+        // Initial 10 tweets on startup
+        socket.on("search", (json) => {
+                //console.log('search socket reached');
+                //console.log(json);
+                if (json.data) {
+                    //console.log(json.data);
+                    json.data.forEach(tweet => {
+                        //console.log(tweet);
+                        dispatch({ type: "initialize", payload: tweet });
+                    })
+                }
+        })
+    }
+    
     const streamTweets = () => {
         let socket;
 
@@ -45,13 +76,7 @@ const TweetFeed = () => {
         }
 
         socket.on("connect", () => {})
-        // Initial 10 tweets on startup
-        socket.on("search", (json) => {
-            console.log('search socket reached');
-            if (json.data) {
-                dispatch({ type: "add_tweet", payload: json });
-            }
-        })
+        
         socket.on("tweet", (json) => {
             if (json.data) {
                 dispatch({ type: "add_tweet", payload: json })
@@ -119,20 +144,32 @@ const TweetFeed = () => {
         streamTweets()
     }, [])
 
+    const showInitial = () => {
+        return (
+            <React.Fragment>
+                {console.log(initial)}
+                {initial.map((tweet) => (
+                    <Tweet key={tweet.id} json={tweet} initial={true} />
+                ))}
+            </React.Fragment>
+        )
+    }
     const showTweets = () => {
+        //initializeTweets();
         if (tweets.length > 0) {
             return (
                 <React.Fragment>
                     {tweets.map((tweet) => (
-                        <Tweet key={tweet.data.id} json={tweet} />
+                        <Tweet key={tweet.data.id} json={tweet} initial={false}/>
                     ))}
-                </React.Fragment>
-            )
+               </React.Fragment>
+            );
         }
     }
 
     return (
         <div>
+            {showInitial()}
             {reconnectMessage()}
             {errorMessage()}
             {waitingMessage()}

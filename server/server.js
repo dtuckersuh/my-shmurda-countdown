@@ -44,6 +44,7 @@ const sleep = async (delay) => {
 }
 
 app.get("/api/rules", async (req, res) => {
+    console.log('api rules get request reached');
     if (!BEARER_TOKEN) {
         res.status(400).send(authMessage)
     }
@@ -66,7 +67,7 @@ app.get("/api/rules", async (req, res) => {
                 throw new Error(response.body.error.message)
             }
         }
-        console.log(response);
+        //console.log(response);
         res.send(response)
     } catch (e) {
         res.send(e)
@@ -74,7 +75,8 @@ app.get("/api/rules", async (req, res) => {
 })
 
 
-app.post("api/rules", async (req, res) => {
+app.post("/api/rules", async (req, res) => {
+    console.log('api rules post request reached');
     if (!BEARER_TOKEN) {
         res.status(400).send(authMessage);
     }
@@ -102,65 +104,58 @@ app.post("api/rules", async (req, res) => {
     }
 })
 
-//const payload = { 'query': "Bobby Shmurda OR #BobbyShmurda OR #FreeShmurda -#NowPlaying",
-//                        'max_results': '10'};
+const payload = { 'query': "Bobby Shmurda OR #BobbyShmurda OR #FreeShmurda -#NowPlaying",
+                        'max_results': '10'};
 
 // Initial search of 10 filtered tweets
-app.get("api/search", async (req, res) => {
-    if (!BEARER_TOKEN) {
-        res.status(400).send(authMessage);
-    }
+//app.get("/api/search", async (req, res, socket) => {
+//    console.log('api search get request reached');
+//    if (!BEARER_TOKEN) {
+//        res.status(400).send(authMessage);
+//    }
+//
+//    const token = BEARER_TOKEN;
+//    const requestConfig = {
+//        url: 'https://api.twitter.com/2/tweets/search/recent?max_results=10&query=Bobby Shmurda OR %23BobbyShmurda OR %23FreeShmurda -%23NowPlaying',
+//        auth: {
+//            bearer: token,
+//        },
+//        json: true,
+//    }
+//
+//    try {
+//        const response = await get(requestConfig);
+//        //console.log(response);
+//        if (response.statusCode === 200 || response.statusCode === 201) {
+//            res.send(response);
+//            //socket.emit("search", response);
+//        } else {
+//            throw new Error(response);
+//        }
+//    } catch (e) {
+//        res.send(e);
+//    }
+//});
 
-    const token = BEARER_TOKEN;
+const initialTweets = async (socket, token) => {
     const requestConfig = {
-        url: 'https://api.twitter.com/2/tweets/search/recent?query=Bobby Shmurda OR %23BobbyShmurda OR %23FreeShmurda -%23NowPlaying&max_results=10',
+        url: 'https://api.twitter.com/2/tweets/search/recent?max_results=10&query=Bobby Shmurda OR %23BobbyShmurda OR %23FreeShmurda -%23NowPlaying',
         auth: {
             bearer: token,
         },
+        json: true,
     }
-
     try {
         const response = await get(requestConfig);
-        //console.log(response);
-        if (response.statusCode === 200 || response.statusCode === 201) {
-            res.send(response);
-        } else {
-            throw new Error(response);
-        }
-    } catch (e) {
-        res.send(e);
-    }
-});
-
-const initialTweets = (socket, token) => {
-    //const config = {
-    //    url: searchURL,
-    //    auth: {
-    //        bearer: token,
-    //    },
-    //    json: payload,
-    //}
-    let config = {
-      'url': 'https://api.twitter.com/2/tweets/search/recent?query=Bobby Shmurda OR %23BobbyShmurda OR %23FreeShmurda -%23NowPlaying&max_results=10',
-      'headers': {
-        'Authorization': 'Bearer ', token,
-        'Cookie': 'personalization_id="v1_btHYm+zSlDj7Hzg8e8RFmQ=="; guest_id=v1%3A159926825574158480'
-      }
-    };
-    try {
-        const json = request.get(config);
-        console.log(json);
         console.log('initial tweets function reached');
-        if (json.connection_issue) {
-            console.log('json connection issue');
-            socket.emit("error", json);
+        if (response.statusCode === 200 || response.statusCode === 201) {
+            const json = response.body;
+            console.log('response emitted');
+            console.log(json);
+            socket.emit("search", json);
         } else {
-            if (json.data) {
-                socket.emit("search", json);
-            } else {
-                console.log('incorrect/no json.data')
-                socket.emit("error", errorMessage);
-            }
+            console.log('error');
+            socket.emit("error", errorMessage);
         }
     } catch (e) {
         console.log('error catch');
@@ -185,7 +180,6 @@ const streamTweets = (socket, token) => {
     try {
         const stream = request.get(config)
         //console.log(stream);
-        initialTweets(socket, token);
         stream
             .on("data", (data) => {
                 try {
@@ -226,6 +220,7 @@ io.on("connection", async (socket) => {
     try {
         const token = BEARER_TOKEN;
         io.emit("connect", "Client Connected");
+        //console.log("CONNECTION");
         streamTweets(io, token);
     } catch (e) {
         io.emit("authError", authMessage);

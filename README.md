@@ -6,7 +6,9 @@ Web application that displays a countdown until popular rapper Bobby Shmurda's r
 
 ## TODO:
 - [x] Apply streaming app tutorial to application
-- [ ] Send searchTweets GET request with proper parameters, emit response with proper data to 'search' socket
+- [X] Send searchTweets GET request with proper parameters, emit response with proper data to 'search' socket
+- [] Figure out way to display initial Tweet list on startup 
+- [] Figure out way for intial list to stay persistent when stream list is updated
 - [ ] Fix SameSite cookie issue
 - [ ] Make site pretty (semantic-ui?)
 - [ ] Make countdown clock from Shmurda's parole date
