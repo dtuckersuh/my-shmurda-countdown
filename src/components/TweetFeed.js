@@ -59,7 +59,7 @@ const TweetFeed = () => {
                 if (json.data) {
                     //console.log(json.data);
                     json.data.forEach(tweet => {
-                        //console.log(tweet);
+                        console.log(tweet, "Tweety bird");
                         dispatch({ type: "initialize", payload: tweet });
                     })
                 }
@@ -89,7 +89,6 @@ const TweetFeed = () => {
             dispatch({ type: "show_error", payload: data })
         })
         socket.on("authError", (data) => {
-            console.log("data =>", data)
             dispatch({ type: "add_errors", payload: [data] })
         })
     }
@@ -147,7 +146,7 @@ const TweetFeed = () => {
     const showInitial = () => {
         return (
             <React.Fragment>
-                {console.log(initial)}
+                {console.log(initial, "Its ame Mario")}
                 {initial.map((tweet) => (
                     <Tweet key={tweet.id} json={tweet} initial={true} />
                 ))}

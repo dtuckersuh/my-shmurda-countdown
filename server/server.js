@@ -76,7 +76,7 @@ app.get("/api/rules", async (req, res) => {
 
 
 app.post("/api/rules", async (req, res) => {
-    console.log('api rules post request reached');
+    //console.log('api rules post request reached');
     if (!BEARER_TOKEN) {
         res.status(400).send(authMessage);
     }
@@ -147,11 +147,11 @@ const initialTweets = async (socket, token) => {
     }
     try {
         const response = await get(requestConfig);
-        console.log('initial tweets function reached');
+        //console.log('initial tweets function reached');
         if (response.statusCode === 200 || response.statusCode === 201) {
             const json = response.body;
-            console.log('response emitted');
-            console.log(json);
+            //console.log('response emitted');
+            //console.log(json);
             socket.emit("search", json);
         } else {
             console.log('error');
@@ -220,6 +220,7 @@ io.on("connection", async (socket) => {
     try {
         const token = BEARER_TOKEN;
         io.emit("connect", "Client Connected");
+        initialTweets(socket, token);
         //console.log("CONNECTION");
         streamTweets(io, token);
     } catch (e) {
